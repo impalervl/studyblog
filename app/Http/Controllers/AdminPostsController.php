@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
 use App\Http\Requests\PostCreateRequest;
 use App\Photo;
 use App\Post;
@@ -29,7 +30,13 @@ class AdminPostsController extends Controller
      */
     public function create()
     {
-        return view('admin.posts.create');
+       // $post = Post::findOrFail($id);
+
+        $categories = Category::pluck('name','id');
+
+        $categories = $categories->toArray();
+            
+        return view('admin.posts.create',compact('categories'));
     }
 
     /**
@@ -45,17 +52,16 @@ class AdminPostsController extends Controller
         $input = $request->all();
 
         if($file = $request->file('photo_id')){
-            
-            $file->move('images',$name);
-             
+
             $name = time() .$file ->getClientOriginalName($file);
+
+            $file->move('images',$name);
 
             $photo = Photo::create(['path'=>$name]);
 
         }
 
         $input['photo_id'] = $photo->id;
-        $input['category_id'] = 1;
         $input['user_id'] = $user->id;
 
         Post::create($input);
